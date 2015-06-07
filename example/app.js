@@ -7,13 +7,12 @@ var express = require('express'),
 var app = express();
 
 swagger.init(app, {
-        apiPath: '/api',
-        apis: ['./routes.js']
-    },
-    {
+    info: {
         title: 'Hello World',
         version: '1.0.0'
-    }
+    },
+    apiPath: '/api',
+    apiFiles: ['./routes.js']
 });
 
 routes.setup(app);
