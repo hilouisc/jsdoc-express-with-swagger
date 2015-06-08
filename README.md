@@ -1,255 +1,91 @@
-{swagger-express}
-=========
+# jsdoc-express-with-swagger
+**jsdoc-express-with-swagger** is a simple and clean solution to integrate [Swagger](htto://swagger.io) with Express
+using JSDoc.
 
-# Notes
-* YAML does not like tabs. Do no use them in the Swagger JSDoc comments!!!
+## Supported Swagger Versions
+* 2.0
 
-[Swagger](https://developers.helloreverb.com/swagger/) is a specification and complete framework
-implementation for describing, producing, consuming, and visualizing RESTful web services.
-View [demo](http://petstore.swagger.wordnik.com/).
-
-__{swagger-express}__ is a simple and clean solution to integrate swagger with express.
-
-## Installation
-
-    $ npm install swagger-express
+## Install
+    $ npm install jsdoc-express-with-swagger
 
 ## Quick Start
+Initialize the module with `init(app, config)` where `app` is your Express app and `config` is the configuration object.
 
-Configure {swagger-express} as express middleware.
+jsdoc-express-with-swagger parses the specified JavaScript files looking for JSDoc comments with the `@swagger` tag.
+The body of the comment is a YAML object that gets added to the Swagger object under the `paths` property.
 
+Add properties to the Swagger object by modifying the exported value `swaggerObject`.
 
-`apiVersion`      -> Your api version.
+    // app.js
+    'use strict';
 
-`swaggerVersion`  -> Swagger version.
+    var express = require('express'),
+        swagger = require('jsdoc-express-with-swagger');
 
-`swaggerUI`       -> Where is your swagger-ui?
+    var app = express();
 
-`swaggerURL`      -> Path to use for swagger ui web interface.
+    swagger.init(app, {
+        info: {                    // This is the same info property in the Swagger 2.0 spec.
+            title: 'Hello World',
+            version: '1.0.0'
+        },
+        apiPath: '/api',          // Path that will serve the Swagger JSON object.
+        apiFiles: ['./app.js']    // List of files to parse for Swagger documentation.
+    });
 
-`swaggerJSON`     -> Path to use for swagger ui JSON.
+    /**
+     *  @swagger
+     *  /:
+     *    get:
+     *      responses:
+     *        200:
+     *          description: hello world
+     */
+    app.get('/', function (req, res) {
+        res.send('Hello World!')
+    };
 
-`basePath`        -> The basePath for swagger.js
+    // Add properties to the Swagger object.
+    swagger.swaggerObject.schemes = [ 'http' ];
 
-`info`            -> [Metadata][info] about the API
+    app.listen(3000);
 
-`apis`            -> Define your api array.
+The code above will serve the following Swagger JSON object at `localhost:3000/api`.
 
-`middleware`      -> Function before response.
+    {
+      "info": {
+        "title": "Hello World",
+        "version": "1.0.0"
+      },
+      "paths": {
+        "/": {
+          "get": {
+            "response": {
+              "200": {
+                "description": "hello world"
+              }
+            }
+          }
+        }
+      },
+      "schemes": [
+        "http"
+      ]
+    }
 
-```
-var swagger = require('swagger-express');
+## Example App
+Clone the jsdoc-express-with-swagger repo and install the dev dependencies:
 
-app.configure(function(){
-  ...
-  app.use(swagger.init(app, {
-    apiVersion: '1.0',
-    swaggerVersion: '1.0',
-    swaggerURL: '/swagger',
-    swaggerJSON: '/api-docs.json',
-    swaggerUI: './public/swagger/',
-    basePath: 'http://localhost:3000',
-    info: {
-      title: 'swagger-express sample app',
-      description: 'Swagger + Express = {swagger-express}'
-    },
-    apis: ['./api.js', './api.yml'],
-    middleware: function(req, res){}
-  }));
-  app.use(app.router);
-  ...
-});
-```
-
-[info]: https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md#513-info-object
-
-## Read from jsdoc
-
-Example 'api.js'
-
-```js
-
-/**
- * @swagger
- * resourcePath: /api
- * description: All about API
- */
-
-/**
- * @swagger
- * path: /login
- * operations:
- *   -  httpMethod: POST
- *      summary: Login with username and password
- *      notes: Returns a user based on username
- *      responseClass: User
- *      nickname: login
- *      consumes:
- *        - text/html
- *      parameters:
- *        - name: username
- *          description: Your username
- *          paramType: query
- *          required: true
- *          dataType: string
- *        - name: password
- *          description: Your password
- *          paramType: query
- *          required: true
- *          dataType: string
- */
-exports.login = function (req, res) {
-  var user = {};
-  user.username = req.param('username');
-  user.password = req.param('password');
-  res.json(user);
-}
-
-/**
- * @swagger
- * models:
- *   User:
- *     id: User
- *     properties:
- *       username:
- *         type: String
- *       password:
- *         type: String
- */
-```
-
-## Read from yaml file
-
-Example 'api.yml'
-
-```yml
-resourcePath: /api
-description: All about API
-apis:
-
-- path: /login
-  operations:
-
-  - httpMethod: POST
-    summary: Login with username and password
-    notes: Returns a user based on username
-    responseClass: User
-    nickname: login
-    consumes:
-      - text/html
-    parameters:
-
-    - name: username
-      dataType: string
-      paramType: query
-      required: true
-      description: Your username
-
-    - name: password
-      dataType: string
-      paramType: query
-      required: true
-      description: Your password
-
-models:
-    User:
-      id: User
-      properties:
-        username:
-          type: String
-        password:
-          type: String
-```
-
-## Read from jsdoc
-
-Example 'api.coffee'
-
-```coffee
-
-###
- * @swagger
- * resourcePath: /api
- * description: All about API
-###
-
-###
- * @swagger
- * path: /login
- * operations:
- *   -  httpMethod: POST
- *      summary: Login with username and password
- *      notes: Returns a user based on username
- *      responseClass: User
- *      nickname: login
- *      consumes:
- *        - text/html
- *      parameters:
- *        - name: username
- *          description: Your username
- *          paramType: query
- *          required: true
- *          dataType: string
- *        - name: password
- *          description: Your password
- *          paramType: query
- *          required: true
- *          dataType: string
-###
-
-###
- * @swagger
- * models:
- *   User:
- *     id: User
- *     properties:
- *       username:
- *         type: String
- *       password:
- *         type: String
-###
-```
-
-
-## Examples
-
-Clone the {swagger-express} repo, then install the dev dependencies:
-
-    $ git clone git://github.com/fliptoo/swagger-express.git --depth 1
-    $ cd swagger-express
+    $ git clone git://github.com/devlouisc/jsdoc-express-with-swagger.git
+    $ cd jsdoc-express-with-swagger
     $ npm install
 
-and run the example:
+Run the example app:
 
     $ cd example
     $ node app.js
 
-# Credits
-
-- [Express](https://github.com/visionmedia/express)
-- [swagger-jack](https://github.com/feugy/swagger-jack)
-
-## License
-
-(The MIT License)
-
-Copyright (c) 2013 Fliptoo &lt;fliptoo.studio@gmail.com&gt;
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-'Software'), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+## References
+* [Swagger 2.0 Specification](http://swagger.io/specification)
+* [Swagger Live Demo](http://petstore.swagger.io)
+* swagger-example.json is the JSON object that the Swagger live demo fetches.
