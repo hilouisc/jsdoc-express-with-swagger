@@ -1,5 +1,5 @@
-# jsdoc-express-with-swagger
-**jsdoc-express-with-swagger** is a simple and clean solution to integrate [Swagger](htto://swagger.io) with Express
+# {jsdoc-express-with-swagger}
+**{jsdoc-express-with-swagger}** is a simple and clean solution to integrate [Swagger](htto://swagger.io) with Express
 using JSDoc.
 
 ## Supported Swagger Versions
@@ -11,7 +11,7 @@ using JSDoc.
 ## Quick Start
 Initialize the module with `init(app, config)` where `app` is your Express app and `config` is the configuration object.
 
-jsdoc-express-with-swagger parses the specified JavaScript files looking for JSDoc comments with the `@swagger` tag.
+{jsdoc-express-with-swagger} parses the specified JavaScript files looking for JSDoc comments with the `@swagger` tag.
 The body of the comment is a YAML object that gets added to the Swagger object under the `paths` property.
 
 Add properties to the Swagger object by modifying the exported value `swaggerObject`.
@@ -74,7 +74,7 @@ The code above will serve the following Swagger JSON object at `localhost:3000/a
     }
 
 ## Example App
-Clone the jsdoc-express-with-swagger repo and install the dev dependencies:
+Clone the {jsdoc-express-with-swagger} repo and install the dev dependencies:
 
     $ git clone git://github.com/devlouisc/jsdoc-express-with-swagger.git
     $ cd jsdoc-express-with-swagger
