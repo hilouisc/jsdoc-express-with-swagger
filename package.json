@@ -1,6 +1,6 @@
 {
   "name": "jsdoc-express-with-swagger",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "Document your Express REST API with Swagger.",
   "main": "index.js",
   "scripts": {
