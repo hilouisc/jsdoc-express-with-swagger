@@ -45,10 +45,10 @@ Add properties to the Swagger object by modifying the exported value `swaggerObj
         res.send('Hello World!');
     });
 
-// Add properties to the Swagger object.
-swagger.swaggerObject.schemes = [ 'http' ];
+    // Add properties to the Swagger object.
+    swagger.swaggerObject.schemes = [ 'http' ];
 
-app.listen(3000);
+    app.listen(3000);
 
 The code above will serve the following Swagger JSON object at `localhost:3000/api`.
 
