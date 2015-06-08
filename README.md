@@ -88,5 +88,5 @@ Run the example app:
 ## References
 * [Swagger 2.0 Specification](http://swagger.io/specification)
 * [Swagger Live Demo](http://petstore.swagger.io)
-* swagger-example.json is the JSON object that the Swagger live demo fetches.
-* swagger-example.yml is the JSON object that the Swagger live demo fetches in YAML format.
+* *swagger-example.json* is the JSON object that the Swagger live demo fetches.
+* *swagger-example.yml* is the JSON object that the Swagger live demo fetches in YAML format.
