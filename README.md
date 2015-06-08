@@ -11,8 +11,8 @@ using JSDoc.
 ## Quick Start
 Initialize the module with `init(app, config)` where `app` is your Express app and `config` is the configuration object.
 
-**{jsdoc-express-with-swagger}** parses the specified JavaScript files looking for JSDoc comments with the `@swagger` tag.
-The body of the comment is a YAML object that gets added to the Swagger object under the `paths` property.
+**{jsdoc-express-with-swagger}** parses the specified JavaScript files looking for JSDoc comments with the `@swagger`
+tag. The body of the comment is a YAML object that gets added to the Swagger object under the `paths` property.
 
 Add properties to the Swagger object by modifying the exported value `swaggerObject`.
 
