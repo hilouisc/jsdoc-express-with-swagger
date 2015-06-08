@@ -9,22 +9,22 @@ module.exports.setup = function (app) {
     /**
      *  @swagger
      *  /:
-     *      get:
-     *          responses:
-     *              200:
-     *                  description: hello world
+     *    get:
+     *      responses:
+     *        200:
+     *          description: hello world
      */
     app.get('/', rootHandler);
 
     /**
      *  @swagger
      *  /login:
-     *      post:
-     *          responses:
-     *              200:
-     *                  description: login
+     *    post:
+     *      responses:
+     *        200:
+     *          description: login
      */
-    app.get('/login', loginHandler);
+    app.post('/login', loginHandler);
 };
 
 function rootHandler(req, res) {
