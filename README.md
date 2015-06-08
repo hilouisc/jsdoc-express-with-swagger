@@ -1,5 +1,5 @@
 # {jsdoc-express-with-swagger}
-**{jsdoc-express-with-swagger}** is a simple and clean solution to integrate [Swagger](htto://swagger.io) with Express
+**{jsdoc-express-with-swagger}** is a simple and clean solution to integrate [Swagger](http://swagger.io) with Express
 using JSDoc.
 
 ## Supported Swagger Versions
