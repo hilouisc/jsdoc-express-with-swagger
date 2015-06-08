@@ -10,6 +10,7 @@ module.exports.setup = function (app) {
      *  @swagger
      *  /:
      *    get:
+     *      description: Returns Hello World!
      *      responses:
      *        200:
      *          description: hello world
@@ -20,6 +21,20 @@ module.exports.setup = function (app) {
      *  @swagger
      *  /login:
      *    post:
+     *      description: Login to the application
+     *      produces:
+     *        - application/json
+     *      parameters:
+     *        - name: username
+     *          description: Username to use for login.
+     *          in: formData
+     *          required: true
+     *          type: string
+     *        - name: password
+     *          description: User's password.
+     *          in: formData
+     *          required: true
+     *          type: string
      *      responses:
      *        200:
      *          description: login
@@ -27,13 +42,20 @@ module.exports.setup = function (app) {
     app.post('/login', loginHandler);
 };
 
+/**
+ *  Handler for the Homepage
+ *  @param {object} req - Express request
+ *  @param {object} res - Express response
+ */
 function rootHandler(req, res) {
     res.send('Hello World!');
 }
 
+/**
+ *  Handler for the Login
+ *  @param {object} req - Express request
+ *  @param {object} res - Express response
+ */
 function loginHandler(req, res) {
-    var user = {};
-    user.username = req.param('username');
-    user.password = req.param('password');
-    res.json(user);
+    res.json(req.body);
 }
