@@ -1,11 +1,8 @@
 {
   "name": "jsdoc-express-with-swagger",
-  "version": "0.0.0",
-  "description": "Document your Express REST API with Swagger.",
+  "version": "1.0.0",
+  "description": "Document Express REST API's with Swagger.",
   "main": "index.js",
-  "scripts": {
-    "lint": "./node_modules/eslint/bin/eslint.js . || exit 0"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/devlouisc/jsdoc-express-with-swagger.git"
@@ -19,17 +16,15 @@
   ],
   "author": "devlouisc",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/devlouisc/jsdoc-express-with-swagger/issues"
-  },
-  "homepage": "https://github.com/devlouisc/jsdoc-express-with-swagger#readme",
   "dependencies": {
-    "doctrine": "^0.6.4",
-    "js-yaml": "^3.3.1",
-    "swagger-tools": "^0.8.7"
+    "doctrine": "^1.2.0",
+    "js-yaml": "^3.5.3",
+    "swagger-tools": "^0.10.1"
   },
   "devDependencies": {
-    "eslint": "^0.22.1",
-    "express": "^4.12.4"
+    "gulp": "^3.9.1",
+    "gulp-mocha": "^2.2.0",
+    "gulp-standard": "^6.0.5",
+    "run-sequence": "^1.1.5"
   }
 }
