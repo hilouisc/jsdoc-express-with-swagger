@@ -5,146 +5,138 @@ const fs = require('fs')
 const jsYaml = require('js-yaml')
 const path = require('path')
 
-module.exports.openApiObject = null
-
-/**
- * @callback
- */
-
 /**
  * Parses the Swagger documentation and serves the resulting JSON object at the specified route.
- * This is indended to be called once. Subsequent calls will return an error.
  * @param {Object} app - Express application
  * @param {Object} config - Configuration
- * @param {Object} config.info -
- * @param {String[]} config.files -
- * @param {String} config.route -
- * @param {Callback} callback -
+ *  {
+ *    {String} version - Swagger version
+ *    {Object} info - Swagger info
+ *    {String[]} files - Files to parse
+ *    {String} route - Route to serve the Swagger object on
+ *  }
+ * @param {Function} callback - (err, swaggerObject)
  * @returns {Promise} Resolves with the Swagger object
  */
 module.exports.doc = function (app, config, callback) {
   callback = callback || function () {}
 
-  return new Promise((resolve, reject) => {
-    if (!config || !config.info || !config.files || !config.route) {
-      let err = new Error('Invalid config parameter.')
-      reject(err)
-      return callback(err, null)
+  return new Promise(function (resolve, reject) {
+    // Validate the config parameter.
+    if (!config || !config.version || !config.info || !config.files || !config.route) {
+      return reject(new Error('Invalid config parameter.'))
     }
 
+    // Validate the Swagger version.
+    if (config.version !== '2.0') {
+      return reject(new Error('Unsupported Swagger version.'))
+    }
 
+    // Resolve with the initial Swagger object.
+    return resolve({
+      swagger: config.version,
+      info: config.info,
+      paths: {}
+    })
+  })
+  .then(function (swaggerObject) {
+    // Parse the API files and add the data to the Swagger object.
+
+    // for (let i = 0; i < config.files.length; i++) {
+    //   let jsDocComments = parseApiFile(config.files[i])
+    //   let swaggerJsDocComments = filterJsDocComments(jsDocComments)
+    //   addDataToSwaggerObject(swaggerObject, swaggerJsDocComments)
+    // }
+
+    // Parse the files for Swagger JSDoc comments.
+    let promises = []
+
+    for (let i = 0; i < config.files.length; i++) {
+      promises.push(parseSwaggerJsdocComments(config.files[i]))
+    }
+
+    return Promise.all(promises)
+      .then(function (swaggerJsdocComments) {
+        // Merge the comments.
+
+      })
+      .then(function (comments) {
+        // Add the results to the Swagger object.
+
+        return swaggerObject
+      })
+  })
+  .then(function (swaggerObject) {
+    // Validate the Swagger object.
+    if (module.exports.validate(swaggerObject) === false) {
+      throw new Error('Invalid Swagger object:\n' + JSON.stringify(swaggerObject))
+    }
+
+    return swaggerObject
+  })
+  .then(function (swaggerObject) {
+    // Add Express route to serve the Swagger object.
+    app.get(config.path, function (req, res) {
+      res.json(swaggerObject)
+    })
+
+    return swaggerObject
+  })
+  .catch(function (err) {
+    callback(err, null)
+    return Promise.reject(err)
   })
 }
 
 /**
- * Validates the OpenAPI object.
- * @param {String} version - Version of the OpenAPI specification to validate against
- * @param {Object} openApiObject - OpenAPI object
+ * Validates the Swagger object.
+ * @param {Object} swaggerObject - Swagger object
  * @returns {Boolean}
  */
-module.exports.validate = function (version, openApiObject) {
+module.exports.validate = function (swaggerObject) {
 
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-/**
- * Initializes the module. This is intended to be called only once.
- * @param {Object} app - Express application
- * @param {Object} config - Module configuration
- *  {
- *    info: Object,
- *    apiPath: String,
- *    apiFiles: Array[String]
- *  }
- */
-module.exports.init = function (app, config) {
-  if (!config) {
-    throw new Error("'config' is required.")
-  } else if (!config.info) {
-    throw new Error("'config.info' is required.")
-  } else if (!config.apiPath) {
-    throw new Error("'config.apiPath' is required.")
-  } else if (!config.apiFiles) {
-    throw new Error("'config.apiFiles' is required.")
-  }
-
-  // This is the Swagger object that conforms to the Swagger 2.0 specification.
-  var swaggerObject = {
-    swagger: '2.0',
-    info: config.info,
-    paths: {}
-  }
-
-  // Parse the API files and add the data to the Swagger object.
-  for (var i = 0; i < config.apiFiles.length; i++) {
-    var jsDocComments = parseApiFile(config.apiFiles[i])
-    var swaggerJsDocComments = filterJsDocComments(jsDocComments)
-    addDataToSwaggerObject(swaggerObject, swaggerJsDocComments)
-  }
-
-  // Validate the Swagger object.
-  var validSwaggerObject = module.exports.validateSwaggerObject2dot0(swaggerObject)
-  if (validSwaggerObject === false) {
-    throw new Error('Invalid Swagger object:\n' + JSON.stringify(swaggerObject))
-  }
-
-  // Add Express route to serve the Swagger JSON object.
-  app.get(config.apiPath, function (req, res) {
-    res.json(module.exports.swaggerObject)
-  })
-
-  // Expose the Swagger object so that the module consumer has access to it.
-  module.exports.swaggerObject = swaggerObject
 }
 
 // -- Parsing ----------------------------------------------------------------------------------------------------------
 
-/**
- * Parses the provided API file for JSDoc comments.
- * @param {String} file - File to be parsed
- * @returns {Array} JSDoc comments as parsed by the 'doctrine' module
- */
-function parseApiFile (file) {
-  var fileExtension = path.extname(file)
-  if (fileExtension !== '.js') {
-    throw new Error("Unsupported extension '" + fileExtension + "'.")
-  }
+function parseSwaggerJsdocComments (file) {
+  return new Promise(function (resolve, reject) {
+    // Read the file contents.
+    fs.readFile(file, { encoding: 'utf-8'}, function (err, data) {
+      return err ? reject(err) : resolve(data)
+    })
+  })
+  .then(function (fileContent) {
+    // Parse the JSDoc comments.
+    const jsdocRegex = /\/\*\*([\s\S]*?)\*\//gm
+    let jsdocRegexResults = fileContent.match(jsdocRegex)
+    let jsdocComments = []
 
-  var jsDocRegex = /\/\*\*([\s\S]*?)\*\//gm
-  var fileContent = fs.readFileSync(file, { encoding: 'utf8' })
-  var regexResults = fileContent.match(jsDocRegex)
-
-  var jsDocComments = []
-  if (regexResults) {
-    for (var i = 0; i < regexResults.length; i++) {
-      var jsDocComment = doctrine.parse(regexResults[i], { unwrap: true })
-      jsDocComments.push(jsDocComment)
-    }
-  }
-
-  return jsDocComments
-}
-
-/**
- * Filters JSDoc comments for those tagged with '@swagger'
- * @param {Array} JSDoc comments
- * @returns {Array} JSDoc comments tagged with '@swagger'
- */
-function filterJsDocComments (jsDocComments) {
-  var swaggerJsDocComments = []
-
-  for (var i = 0; i < jsDocComments.length; i++) {
-    var jsDocComment = jsDocComments[i]
-    for (var j = 0; j < jsDocComment.tags.length; j++) {
-      var tag = jsDocComment.tags[j]
-      if (tag.title === 'swagger') {
-        swaggerJsDocComments.push(jsYaml.safeLoad(tag.description))
+    if (jsdocRegexResults) {
+      for (let i = 0; i < jsdocRegexResults.length; i++) {
+        let jsdocComment = doctrine.parse(regexResults[i], { unwrap: true })
+        jsdocComments.push(jsdocComment)
       }
     }
-  }
 
-  return swaggerJsDocComments
+    return jsdocComments
+  })
+  .then(function (jsdocComments) {
+    // Filter for comments tagged with '@swagger'.
+    let swaggerJsdocComments = []
+
+    for (let i = 0; i < jsdocComments.length; i++) {
+      let jsdocComment = jsdocComments[i]
+      for (let j = 0; j < jsDocComment.tags.length; j++) {
+        let tag = jsDocComment.tags[j]
+        if (tag.title === 'swagger') {
+          swaggerJsdocComments.push(jsYaml.safeLoad(tag.description))
+        }
+      }
+    }
+
+    return swaggerJsdocComments
+  })
 }
 
 /**
@@ -153,15 +145,15 @@ function filterJsDocComments (jsDocComments) {
  * @param {Array} JSDoc comments tagged with '@swagger'
  */
 function addDataToSwaggerObject (swaggerObject, swaggerJsDocComments) {
-  for (var i = 0; i < swaggerJsDocComments.length; i++) {
-    var pathObject = swaggerJsDocComments[i]
-    var propertyNames = Object.getOwnPropertyNames(pathObject)
+  for (let i = 0; i < swaggerJsDocComments.length; i++) {
+    let pathObject = swaggerJsDocComments[i]
+    let propertyNames = Object.getOwnPropertyNames(pathObject)
 
-    for (var j = 0; j < propertyNames.length; j++) {
-      var propertyName = propertyNames[j]
+    for (let j = 0; j < propertyNames.length; j++) {
+      let propertyName = propertyNames[j]
       if (swaggerObject.paths.hasOwnProperty(propertyName)) {
-        for (var k in Object.keys(pathObject[propertyName])) {
-          var childPropertyName = Object.keys(pathObject[propertyName])[k]
+        for (let k in Object.keys(pathObject[propertyName])) {
+          let childPropertyName = Object.keys(pathObject[propertyName])[k]
           swaggerObject.paths[propertyName][childPropertyName] = pathObject[propertyName][childPropertyName]
         }
       } else {
@@ -169,18 +161,4 @@ function addDataToSwaggerObject (swaggerObject, swaggerJsDocComments) {
       }
     }
   }
-}
-
-// -- Validation -------------------------------------------------------------------------------------------------------
-
-/**
- * Validates swagger object against Swagger 2.0 specs.
- * @param {Object} swaggerObject - Swagger object
- * @returns {Boolean}
- */
-module.exports.validateSwaggerObject2dot0 = function (swaggerObject) {
-  // TODO: Implement this logic.
-  // This function is exported so that module consumers can add properties to the exported Swagger object and later
-  // validate it.
-  return true
 }
